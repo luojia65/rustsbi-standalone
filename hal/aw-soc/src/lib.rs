@@ -13,6 +13,7 @@ pub mod com;
 #[macro_use]
 pub mod gpio;
 pub mod phy;
+pub mod plic;
 pub mod spi;
 #[macro_use]
 pub mod uart;
@@ -77,6 +78,22 @@ unsafe impl<A: BaseAddress> Send for PHY<A> {}
 
 impl<A: BaseAddress> ops::Deref for PHY<A> {
     type Target = phy::RegisterBlock;
+
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*(self.base.ptr() as *const _) }
+    }
+}
+
+/// Platform-Level Interrupt Controller.
+pub struct PLIC<A: BaseAddress> {
+    base: A,
+}
+
+unsafe impl<A: BaseAddress> Send for PLIC<A> {}
+
+impl<A: BaseAddress> ops::Deref for PLIC<A> {
+    type Target = crate::plic::Plic;
 
     #[inline(always)]
     fn deref(&self) -> &Self::Target {
@@ -158,10 +175,14 @@ impl<A: base_address::BaseAddress> $Trait for $crate::gpio::Pin<A, $p, $i, $m> {
 mod wafer {
     #[cfg(feature = "d1")]
     mod d1;
-    pub mod prelude {
+    pub mod pins {
         #[cfg(feature = "d1")]
         pub use super::d1::Pins;
     }
+    pub mod interrupt {
+        #[cfg(feature = "d1")]
+        pub use super::d1::{Interrupt, Machine, Supevisor};
+    }
 }
 
-pub use wafer::prelude::*;
+pub use wafer::pins::*;

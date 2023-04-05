@@ -21,7 +21,7 @@ pub use d1_rom_rt_macros::entry;
 
 #[cfg(feature = "log")]
 use aw_soc::uart::{self, Parity, Serial, StopBits, WordLength};
-use aw_soc::{ccu::Clocks, time::U32Ext, Pins, CCU, COM, SPI, UART};
+use aw_soc::{ccu::Clocks, time::U32Ext, Pins, CCU, COM, PLIC, SPI, UART};
 use core::arch::asm;
 
 pub struct Parameters {
@@ -33,6 +33,7 @@ pub struct Parameters {
     pub spi0: SPI<Static<0x04025000>>,
     pub com: COM<Static<0x03102000>>,
     pub ccu: CCU<Static<0x02001000>>,
+    pub plic: PLIC<Static<0x10000000>>,
     pub clocks: Clocks,
 }
 
@@ -136,6 +137,7 @@ fn wrap_main() {
     let ccu: CCU<Static<0x02001000>> = unsafe { CCU::steal_static() };
     let uart0: UART<Static<0x02500000>> = unsafe { UART::steal_static() };
     let spi0: SPI<Static<0x04025000>> = unsafe { SPI::steal_static() };
+    let plic: PLIC<Static<0x10000000>> = unsafe { PLIC::steal_static() };
     #[cfg(feature = "log")]
     let config = uart::Config {
         baudrate: 115200.bps(),
@@ -163,6 +165,7 @@ fn wrap_main() {
         spi0,
         com,
         ccu,
+        plic,
         clocks,
     };
     #[cfg(feature = "log")]

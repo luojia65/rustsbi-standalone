@@ -1,4 +1,4 @@
-//! Serial Peripheral Interface bus
+//! Serial Peripheral Interface bus.
 
 use super::SPI;
 use crate::{
